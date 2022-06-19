@@ -39,11 +39,17 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_rx;
 DMA_HandleTypeDef hdma_usart1_tx;
 
 /* USER CODE BEGIN PV */
+// 接收一帧数据的长度
+volatile uint8_t rx_len = 0;
+// 一帧数据接收完成标志
+volatile uint8_t recv_end_flag = 0;
+// 接收数据缓存
+uint8_t rx_buffer[200] = {0};
 uint8_t Rxbuf[4];
 uint8_t ACKbuf[] = "I'm a ACK package";
 /* USER CODE END PV */
@@ -173,6 +179,9 @@ static void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
+  // 使能 IDLE 中断
+  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+  HAL_UART_Receive_DMA(&huart1, rx_buffer, sizeof(rx_buffer));
 
   /* USER CODE END USART1_Init 2 */
 

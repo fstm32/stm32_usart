@@ -229,4 +229,22 @@ void DMA1_Channel5_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+void USART1_IRQHandler(void) {
+	uint32_t tmp_flag = 0;
+	uint32_t temp;
+
+	HAL_UART_IRQHandler(&huart1);
+	if(USART1 == huart1.Instance) {
+		tmp_flag =__HAL_UART_GET_FLAG(&huart1,UART_FLAG_IDLE); //获取IDLE标志位
+		//idle标志被置位
+		if((tmp_flag != RESET)) {
+			recv_end_flag = 1;  // 接受完成标志位置1
+			__HAL_UART_CLEAR_IDLEFLAG(&huart1);//清除标志位
+			HAL_UART_DMAStop(&huart1); //
+			temp = __HAL_DMA_GET_COUNTER(&hdma_usart1_rx);// 获取DMA中未传输的数据个数
+			rx_len =  BUFFER_SIZE - temp; //总计数减去未传输的数据个数，得到已经接收的数据个数
+			HAL_UART_Receive_DMA(&huart1,rx_buffer,BUFFER_SIZE);//重新打开DMA接收
+	    }
+	}
+}
 /* USER CODE END 1 */
